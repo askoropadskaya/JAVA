@@ -1,0 +1,36 @@
+   @Test
+    public void secondTest(){
+        WebDriver driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        WebDriverWait wait=new WebDriverWait(driver, 3);
+
+        try {
+            driver.get("https://www.webstaurantstore.com/");
+            driver.findElement(By.xpath("//input[@name='searchval']")).sendKeys("stainless work table");
+            driver.findElement(By.xpath("//div[@class='banner-search-group']//button[@type='submit']")).click();
+            List<WebElement> products = driver.findElements(By.xpath("//div[@class='ag-item gtm-product ']"));
+            String productText;
+            Integer amountOfPages = Integer.parseInt(driver.findElement(By.xpath("//div[@class='pagination pagination--unified centered']/ul/li[last()-1]/a")).getText());
+            for(int i = 0; i < amountOfPages-1; i++) {
+                for (int j = 0; j < products.size(); j++) {
+                    productText = driver.findElement(By.xpath(String.format("//div[@class='ag-item gtm-product '][%s]//a[@class='description']", j + 1))).getText();
+                    System.out.println(productText);
+                    assertTrue(productText.contains("Table"), "There is not 'Table' in the product name'");
+                }
+                if(i == amountOfPages - 2){
+                    driver.findElement(By.xpath("//div[@class='ag-item gtm-product '][last()]//input[@name='addToCartButton']")).click();
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='ag-sub-grid']")));
+                    if(driver.findElement((By.xpath("//div[@id='ag-sub-grid']"))).isDisplayed()){
+                        driver.findElement(By.xpath("//button[@name='addToCartButton']")).click();
+                    }
+                    driver.findElement(By.xpath("//div[@class='notification-center']//a[text() = 'View Cart']")).click();
+                    driver.findElement(By.xpath("//a[@class='deleteCartItemButton close']/span")).click();
+                }else {
+                    driver.findElement(By.xpath("//div[@class='pagination pagination--unified centered']/ul/li[last()]")).click();
+                }
+            }
+        } finally {
+            driver.close();
+        }
+
+    }
